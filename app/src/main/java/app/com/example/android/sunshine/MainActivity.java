@@ -19,7 +19,7 @@ public class MainActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setBackgroundColor(DEFAULT_KEYS_DIALER);
+        //fab.setBackgroundColor(DEFAULT_KEYS_DIALER);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
