@@ -3,5 +3,6 @@
     <string name="app_name">Sunshine</string>
     <string name="action_settings">Ajustes</string>
     <string name="saludos">Hola Mundo!!!</string>
+    <string name="action_refresh">Refrescar</string>
 
 </resources>

@@ -5,6 +5,9 @@ import android.support.v4.app.Fragment;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
@@ -27,6 +30,36 @@ public class ForecastFragment extends Fragment {
     private ArrayAdapter<String> mForecastAdapter;
 
     public ForecastFragment() {
+        Log.d("ForecastFragment", "pasa 00");
+    }
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        // Add this line in order for this fragment to handle menu events.
+        setHasOptionsMenu(true);
+        Log.d("ForecastFragment", "pasa 01");
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.forecastfragment, menu);
+        Log.d("ForecastFragment", "pasa 02");
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
+        if (id == R.id.action_refresh) {
+            FetchWeatherTask weatherTask = new FetchWeatherTask();
+            weatherTask.execute();
+            return true;
+        }
+        Log.d("ForecastFragment", "pasa 03");
+        return super.onOptionsItemSelected(item);
     }
 
     @Override
@@ -58,6 +91,8 @@ public class ForecastFragment extends Fragment {
         ListView myListView = (ListView) rootView.findViewById(R.id.listView_forecast);
 
         myListView.setAdapter(forecastAdapter);
+
+        setHasOptionsMenu(true);
 
         return rootView;
     }
@@ -108,6 +143,9 @@ public class ForecastFragment extends Fragment {
                     return null;
                 }
                 forecastJsonStr = buffer.toString();
+
+                Log.v(LOG_TAG, "Forecast JSON String: " + forecastJsonStr);
+
             } catch (IOException e) {
                 Log.e("MainActivityFragment", "Error ", e);
                 // If the code didn't successfully get the weather data, there's no point in attemping
