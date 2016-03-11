@@ -6,14 +6,17 @@ import android.support.v4.app.Fragment;
 import android.os.Bundle;
 import android.text.format.Time;
 import android.util.Log;
+import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -49,6 +52,7 @@ public class ForecastFragment extends Fragment {
         super.onCreate(savedInstanceState);
         // Add this line in order for this fragment to handle menu events.
         setHasOptionsMenu(true);
+
         Log.d("ForecastFragment", "pasa 01");
     }
 
@@ -59,17 +63,23 @@ public class ForecastFragment extends Fragment {
     }
 
     @Override
+    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
+        super.onCreateContextMenu(menu, v, menuInfo);
+    }
+
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
         if (id == R.id.action_refresh) {
+            Log.d("ForecastFragment", "pasa 03");
             FetchWeatherTask weatherTask = new FetchWeatherTask();
             weatherTask.execute("2510911");
             return true;
         }
-        Log.d("ForecastFragment", "pasa 03");
+
         return super.onOptionsItemSelected(item);
     }
 
@@ -92,7 +102,7 @@ public class ForecastFragment extends Fragment {
 
         List<String> weekForecast = new ArrayList<String>(Arrays.asList(forecastArray));
 
-        ArrayAdapter<String> forecastAdapter = new ArrayAdapter<String>(
+        mForecastAdapter = new ArrayAdapter<String>(
                 getActivity(),
                 R.layout.list_item_forecast,
                 R.id.list_item_forecast_textview,
@@ -100,9 +110,18 @@ public class ForecastFragment extends Fragment {
 
         ListView myListView = (ListView) rootView.findViewById(R.id.listView_forecast);
 
-        myListView.setAdapter(forecastAdapter);
+        myListView.setAdapter(mForecastAdapter);
 
-        setHasOptionsMenu(true);
+        myListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                String foreCast = mForecastAdapter.getItem(position);
+                Toast.makeText(getActivity(), foreCast,Toast.LENGTH_SHORT).show();
+
+            }
+        });
+
         Log.d("ForecastFragment", "pasa 04");
 
         return rootView;
@@ -110,6 +129,7 @@ public class ForecastFragment extends Fragment {
 
     private class FetchWeatherTask extends AsyncTask<String, Void, String[]> {
         private final String LOG_TAG = FetchWeatherTask.class.getSimpleName();
+        Locale spanish = new Locale("es", "ES");
 
         /* The date/time conversion code is going to be moved outside the asynctask later,
         * so for convenience we're breaking it out into its own method now.
@@ -117,9 +137,10 @@ public class ForecastFragment extends Fragment {
         private String getReadableDateString(long time){
             // Because the API returns a unix timestamp (measured in seconds),
             // it must be converted to milliseconds in order to be converted to valid date.
-            Date date = new Date(time * 1000);
-            SimpleDateFormat shortenedDateFormat = new SimpleDateFormat("EEE dd MMM", Locale.getDefault());
-            return shortenedDateFormat.format(date).toString();
+            Date date = new Date(time);
+            SimpleDateFormat shortenedDateFormat = new SimpleDateFormat("dd MMM EEE", spanish); // Locale.getDefault());
+            String resultado = shortenedDateFormat.format(date).toString();
+            return resultado;
         }
 
         /**
@@ -304,7 +325,7 @@ public class ForecastFragment extends Fragment {
             } catch (JSONException e) {
                 Log.e(LOG_TAG, e.getMessage(), e);
                 e.printStackTrace();
-              }
+            }
 
             return null;
         }

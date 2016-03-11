@@ -4,5 +4,9 @@
     <string name="action_settings">Ajustes</string>
     <string name="saludos">Hola Mundo!!!</string>
     <string name="action_refresh">Refrescar</string>
+    <string name="action_01">Acción nº 1</string>
+    <string name="action_02">Acción nº 2</string>
+    <string name="action_03">Acción nº 3</string>
+    <string name="title_activity_detail">DetailActivity</string>
 
 </resources>
