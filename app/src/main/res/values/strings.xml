@@ -8,5 +8,6 @@
     <string name="action_02">Acción nº 2</string>
     <string name="action_03">Acción nº 3</string>
     <string name="title_activity_detail">DetailActivity</string>
+    <string name="action_details">actividadDetalle</string>
 
 </resources>
