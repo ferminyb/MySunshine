@@ -1,7 +1,10 @@
 package app.com.example.android.sunshine;
 
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
 import android.text.format.Time;
@@ -44,7 +47,6 @@ public class ForecastFragment extends Fragment {
     private ArrayAdapter<String> mForecastAdapter;
 
     public ForecastFragment() {
-        Log.d("ForecastFragment", "pasa 00");
     }
 
     @Override
@@ -52,14 +54,12 @@ public class ForecastFragment extends Fragment {
         super.onCreate(savedInstanceState);
         // Add this line in order for this fragment to handle menu events.
         setHasOptionsMenu(true);
-
-        Log.d("ForecastFragment", "pasa 01");
     }
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         inflater.inflate(R.menu.forecastfragment, menu);
-        Log.d("ForecastFragment", "pasa 02");
+
     }
 
     @Override
@@ -74,13 +74,28 @@ public class ForecastFragment extends Fragment {
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
         if (id == R.id.action_refresh) {
-            Log.d("ForecastFragment", "pasa 03");
-            FetchWeatherTask weatherTask = new FetchWeatherTask();
-            weatherTask.execute("2510911");
-            return true;
+
+           updateWeather();
+           return true;
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        updateWeather();
+    }
+
+    private void updateWeather(){
+        FetchWeatherTask weatherTask = new FetchWeatherTask();
+
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        String location = prefs.getString(getString(R.string.pref_key_location),
+                getString(R.string.pref_valor_defecto_localizacion));
+        String v_units = prefs.getString(getString(R.string.pref_key_units), getString(R.string.pref_valor_defecto_units));
+        weatherTask.execute(location, v_units);
     }
 
     @Override
@@ -88,25 +103,12 @@ public class ForecastFragment extends Fragment {
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
 
-        String[] forecastArray= new String[]{
-                "Hoy - Soleado - 18/7",
-                "Mañana - Soleado - 22/10",
-                "Martes - Nuboso - 18/7",
-                "Miercoles - Soleado - 18/7",
-                "Jueves - Soleado - 18/7",
-                "Viernes - Soleado - 24/17",
-                "Sabado - Nuboso - 18/7",
-                "Domingo - Soleado - 18/7",
-                "Lunes - A cantaros - 15/2",
-        };
-
-        List<String> weekForecast = new ArrayList<String>(Arrays.asList(forecastArray));
 
         mForecastAdapter = new ArrayAdapter<String>(
                 getActivity(),
                 R.layout.list_item_forecast,
                 R.id.list_item_forecast_textview,
-                weekForecast);
+                new ArrayList<String>());
 
         ListView myListView = (ListView) rootView.findViewById(R.id.listView_forecast);
 
@@ -117,12 +119,12 @@ public class ForecastFragment extends Fragment {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 String foreCast = mForecastAdapter.getItem(position);
-                Toast.makeText(getActivity(), foreCast,Toast.LENGTH_SHORT).show();
+
+                Intent intent = new Intent(getActivity(), DetailActivity.class).putExtra(Intent.EXTRA_TEXT, foreCast);
+                startActivity(intent);
 
             }
         });
-
-        Log.d("ForecastFragment", "pasa 04");
 
         return rootView;
     }
@@ -248,7 +250,6 @@ public class ForecastFragment extends Fragment {
             // Will contain the raw JSON response as a string.
             String forecastJsonStr = null;
             String format ="json";
-            String unit ="metric";
             int numDays = 7;
 
             try {
@@ -256,7 +257,7 @@ public class ForecastFragment extends Fragment {
                 // Possible parameters are avaiable at OWM's forecast API page, at
                 // http://openweathermap.org/API#forecast
                 final String BASE_URL ="http://api.openweathermap.org/data/2.5/forecast/daily?";
-                final String QUERY_PARAM = "id";
+                final String QUERY_PARAM = "q";
                 final String FORMAT_PARAM = "mode";
                 final String UNIT_PARAM = "units";
                 final String APPID_PARAM = "appid";
@@ -264,7 +265,7 @@ public class ForecastFragment extends Fragment {
                 Uri builtUri = Uri.parse(BASE_URL).buildUpon()
                         .appendQueryParameter(QUERY_PARAM, params[0])
                         .appendQueryParameter(FORMAT_PARAM, format)
-                        .appendQueryParameter(UNIT_PARAM, unit)
+                        .appendQueryParameter(UNIT_PARAM, params[1])
                         .appendQueryParameter(APPID_PARAM, BuildConfig.OPEN_WEATHER_MAP_API_KEY)
                         .build();
 
